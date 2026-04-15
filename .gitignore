@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.Python
+venv/
+.venv/
+.env
+*.csv
+!data/sample_survey.csv
+.streamlit/secrets.toml
+.idea/
+.vscode/
+*.log
