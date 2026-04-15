@@ -11,22 +11,34 @@ streamlit run streamlit_app.py
 
 Data: place your export as `data/sample_survey.csv`, set `MENTORSHIP_CSV` to its path, or use **Upload CSV** in the sidebar. The bundled `data/sample_survey.csv` is synthetic demo data only.
 
-## Deploy on Streamlit Community Cloud
+## Push to GitHub (first time)
 
-1. Push this repository to GitHub (see below).
-2. Sign in at [Streamlit Community Cloud](https://share.streamlit.io/).
-3. **New app** → pick this repo → branch `main` → Main file path **`streamlit_app.py`** → Deploy.
-4. Optional: set a secret or use **Settings → Secrets** only if you add API keys later; this app does not require secrets for CSV upload.
+This folder is already a **git** repository on `main` with an initial commit. You only need to create the remote on GitHub and push.
 
-## Push to GitHub
+1. On [github.com/new](https://github.com/new), create a **new repository** (any name, e.g. `mentorship-dashboard`). Choose **Public**. Do **not** add a README, `.gitignore`, or license (the repo must stay empty).
+2. In PowerShell, from this project folder, run **one** of the following (replace the URL with yours):
 
-```bash
-git init
-git add .
-git commit -m "Add mentorship Streamlit dashboard"
-git branch -M main
-git remote add origin https://github.com/YOUR_USER/YOUR_REPO.git
-git push -u origin main
+```powershell
+.\scripts\push-to-github.ps1 -RepoUrl "https://github.com/YOUR_USERNAME/YOUR_REPO.git"
 ```
 
-Or use GitHub Desktop / the Cursor source control UI to publish the folder to a new repository.
+Or manually:
+
+```powershell
+& "C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+& "C:\Program Files\Git\bin\git.exe" push -u origin main
+```
+
+GitHub will ask you to sign in (browser or token). After a successful push, your code is on GitHub.
+
+You can also use **GitHub Desktop** or **Cursor’s Source Control** → **Publish Branch** if you prefer a GUI.
+
+## Deploy on Streamlit Community Cloud (hosted URL)
+
+1. Complete **Push to GitHub** above.
+2. Sign in at [share.streamlit.io](https://share.streamlit.io/) with your GitHub account and authorize Streamlit if prompted.
+3. Click **Create app** → select **this repository** and branch **`main`**.
+4. Set **Main file path** to **`streamlit_app.py`** → **Deploy**.
+5. Your public app URL will look like `https://YOUR_APP_NAME.streamlit.app`. Use **Manage app** in the Cloud dashboard to restart or view logs.
+
+This app does not require **Secrets** unless you add API keys later. Users can upload a CSV from the sidebar, or you can replace `data/sample_survey.csv` in the repo and redeploy.
