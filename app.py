@@ -496,6 +496,7 @@ def main():
             st.plotly_chart(
                 horizontal_bar_chart(slabels, svals, "Program ratings"),
                 use_container_width=True,
+                key="shared_program_ratings_mentees",
             )
         with sr:
             st.markdown("##### Mentors")
@@ -503,6 +504,7 @@ def main():
             st.plotly_chart(
                 horizontal_bar_chart(slabels, svals_r, "Program ratings"),
                 use_container_width=True,
+                key="shared_program_ratings_mentors",
             )
 
     st.markdown(
