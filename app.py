@@ -406,7 +406,7 @@ def main():
     )
 
     st.markdown('<p class="sec">AT A GLANCE</p>', unsafe_allow_html=True)
-    c1, c2, c3, c4, c5 = st.columns(5)
+    c1, c2, c3, c4 = st.columns(4)
 
     def kpi_card(col, title: str, value: str, sub: str):
         with col:
@@ -416,13 +416,6 @@ def main():
     rec_r_col = meta["mentor_likert"][4] if len(meta["mentor_likert"]) > 4 else None
     m_rec = mean_score(df_m[rec_m_col])
     r_rec_m = mean_score(df_r[rec_r_col]) if rec_r_col else float("nan")
-    struct_m = (
-        mean_score(df_m[meta["struct_col"]]) if meta["struct_col"] else float("nan")
-    )
-    struct_r = (
-        mean_score(df_r[meta["struct_col"]]) if meta["struct_col"] else float("nan")
-    )
-
     kpi_card(c1, "Mentees", str(n_m), "respondents")
     kpi_card(c2, "Mentors", str(n_r), "respondents")
     kpi_card(c3, "Mentee recommend (avg)", f"{m_rec:.2f}/5" if m_rec == m_rec else "—", "program to fellows")
@@ -431,17 +424,6 @@ def main():
         "Mentor recommend (avg)",
         f"{r_rec_m:.2f}/5" if r_rec_m == r_rec_m else "—",
         "mentorship experience",
-    )
-    clarity = (
-        (struct_m + struct_r) / 2.0
-        if struct_m == struct_m and struct_r == struct_r
-        else float("nan")
-    )
-    kpi_card(
-        c5,
-        "Structure clarity (avg)",
-        f"{clarity:.2f}/5" if clarity == clarity else "—",
-        "mentees & mentors",
     )
 
     st.markdown(
@@ -479,66 +461,35 @@ def main():
             use_container_width=True,
         )
 
-    if meta["struct_col"] and meta["resources_col"]:
+    meet_col = meta["meet_col"]
+    dm = meeting_distribution(df_m, meet_col)
+    dr = meeting_distribution(df_r, meet_col)
+    if not dm.empty or not dr.empty:
         st.markdown(
-            '<p class="sec">SIDE-BY-SIDE · SHARED PROGRAM ITEMS (MEAN 1–5)</p>',
+            '<p class="sec">MEETING FREQUENCY · MENTEES VS MENTORS</p>',
             unsafe_allow_html=True,
         )
-        shared = [
-            (meta["struct_col"], "Structure & expectations clear"),
-            (meta["resources_col"], "Resources helpful"),
-        ]
-        sl, sr = st.columns(2)
-        with sl:
-            st.markdown("##### Mentees")
-            slabels = [s[1] for s in shared]
-            svals = [mean_score(df_m[s[0]]) for s in shared]
-            st.plotly_chart(
-                horizontal_bar_chart(slabels, svals, "Program ratings"),
-                use_container_width=True,
-                key="shared_program_ratings_mentees",
-            )
-        with sr:
-            st.markdown("##### Mentors")
-            svals_r = [mean_score(df_r[s[0]]) for s in shared]
-            st.plotly_chart(
-                horizontal_bar_chart(slabels, svals_r, "Program ratings"),
-                use_container_width=True,
-                key="shared_program_ratings_mentors",
-            )
-
-    st.markdown(
-        '<p class="sec">MEETING FREQUENCY · MENTEES VS MENTORS</p>',
-        unsafe_allow_html=True,
-    )
-    ml, mr = st.columns(2)
-    meet_col = meta["meet_col"]
-    with ml:
-        dm = meeting_distribution(df_m, meet_col)
-        if not dm.empty:
-            st.plotly_chart(
-                donut_meetings(dm, "Mentees — meetings reported"),
-                use_container_width=True,
-            )
-            if "1-4" in dm.index and dm.sum() > 0:
-                st.caption(
-                    f"{dm.get('1-4', 0):.0f}% met 1–4 times (mentee-reported distribution)."
+        ml, mr = st.columns(2)
+        with ml:
+            if not dm.empty:
+                st.plotly_chart(
+                    donut_meetings(dm, "Mentees — meetings reported"),
+                    use_container_width=True,
                 )
-        else:
-            st.info("No meeting-frequency responses for mentees.")
-    with mr:
-        dr = meeting_distribution(df_r, meet_col)
-        if not dr.empty:
-            st.plotly_chart(
-                donut_meetings(dr, "Mentors — meetings reported"),
-                use_container_width=True,
-            )
-            if "1-4" in dr.index and dr.sum() > 0:
-                st.caption(
-                    f"{dr.get('1-4', 0):.0f}% met 1–4 times (mentor-reported distribution)."
+                if "1-4" in dm.index and dm.sum() > 0:
+                    st.caption(
+                        f"{dm.get('1-4', 0):.0f}% met 1–4 times (mentee-reported distribution)."
+                    )
+        with mr:
+            if not dr.empty:
+                st.plotly_chart(
+                    donut_meetings(dr, "Mentors — meetings reported"),
+                    use_container_width=True,
                 )
-        else:
-            st.info("No meeting-frequency responses for mentors.")
+                if "1-4" in dr.index and dr.sum() > 0:
+                    st.caption(
+                        f"{dr.get('1-4', 0):.0f}% met 1–4 times (mentor-reported distribution)."
+                    )
 
     if meta["month_rating_cols"]:
         st.markdown(
