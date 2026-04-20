@@ -361,17 +361,29 @@ def main():
     with st.sidebar:
         st.header("Data")
         uploaded = st.file_uploader("Upload CSV (optional)", type=["csv"])
+        use_sample_data = st.checkbox(
+            "Use bundled sample data",
+            value=False,
+            help="Turn this on only for demo/testing. Leave off to avoid 2-row sample data.",
+        )
         csv_path: Path | None = None
+        source_label = ""
         if uploaded is not None:
             fd, tmp_name = tempfile.mkstemp(suffix=".csv", prefix="mentorship_")
             os.close(fd)
             csv_path = Path(tmp_name)
             csv_path.write_bytes(uploaded.getvalue())
-        elif DEFAULT_CSV.is_file():
+            source_label = f"Uploaded file: {uploaded.name}"
+        elif DEFAULT_CSV.is_file() and DEFAULT_CSV != _DEFAULT_BUNDLED:
             csv_path = DEFAULT_CSV
+            source_label = f"Configured default: {csv_path.name}"
+        elif use_sample_data and _DEFAULT_BUNDLED.is_file():
+            csv_path = _DEFAULT_BUNDLED
+            source_label = f"Bundled sample: {_DEFAULT_BUNDLED.name}"
         else:
             st.warning(
-                f"Default file not found:\n`{DEFAULT_CSV}`\n\nUpload a CSV or set env `MENTORSHIP_CSV`."
+                "Upload your full survey CSV in the sidebar to view complete dashboard data. "
+                "If needed for testing only, enable 'Use bundled sample data'."
             )
             st.stop()
 
@@ -380,6 +392,10 @@ def main():
     except Exception as e:
         st.error(f"Could not load CSV: {e}")
         st.stop()
+
+    with st.sidebar:
+        st.caption(f"Data source: {source_label}")
+        st.caption(f"Rows loaded: {len(df)}")
 
     meta = resolve_survey_columns(list(df.columns))
     if len(meta["mentee_likert"]) < 4 or len(meta["mentor_likert"]) < 4:
